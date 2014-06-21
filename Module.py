@@ -5,15 +5,19 @@ import logging
 import os
 
 class Module:
-    def add_home_page(self, name, handle):
-        self.__home_page_available[name] = handle
-
-    def load_configuration(self):
+    def __init__(self):
         self.__home_page_available = {}
 
         bottle.get('/')(self.__home_page)
         bottle.post('/')(self.__home_page)
 
+    def add_home_page(self, name, handle):
+        self.__home_page_available[name] = handle
+
+    def add_template_dir(self, path):
+        bottle.TEMPLATE_PATH[:0] = [path]
+
+    def load_configuration(self):
         try:
             module_path = os.path.dirname(os.path.abspath(__file__))
             with open('%slog.conf' % module_path) as config_file:
@@ -27,9 +31,9 @@ class Module:
             }
 
     def thread_run(self):
-        bottle.TEMPLATE_PATH[:0] = [
-            '%s/views' % os.path.dirname(os.path.abspath(__file__)),
-        ]
+        self.add_template_dir(
+            '%s/views' % os.path.dirname(os.path.abspath(__file__))
+        )
 
         if Log.get_logger().isEnabledFor(logging.DEBUG):
             bottle.debug()
@@ -39,9 +43,10 @@ class Module:
     def __home_page(self):
 
         if self.__config['home_page'] in self.__home_page_available:
-            return self.__home_page_available[self.__config['home_page']]
+            return self.__home_page_available[self.__config['home_page']]()
 
         if self.__home_page_available:
-            return self.__home_page_available.itervalues().next()
+            key, handle = self.__home_page_available.popitem()
+            return handle()
 
-        return 'Hello world'
+        return 'MoLA'
