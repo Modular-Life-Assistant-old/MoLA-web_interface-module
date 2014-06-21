@@ -42,11 +42,15 @@ class Module:
 
     def __home_page(self):
 
+        if (
+                self.__home_page_available and
+                not self.__config['home_page'] in self.__home_page_available
+            ):
+            self.__config['home_page'] = sorted(
+                self.__home_page_available.keys()
+            )[-1]
+
         if self.__config['home_page'] in self.__home_page_available:
             return self.__home_page_available[self.__config['home_page']]()
-
-        if self.__home_page_available:
-            key, handle = self.__home_page_available.popitem()
-            return handle()
 
         return 'MoLA'
