@@ -1,21 +1,18 @@
 from core import Log
 
-import bottle
+#from modules.web_interface.pages import home
+
+from flask import Flask
 import logging
 import os
 
 class Module:
     def __init__(self):
-        self.__home_page_available = {}
+        self.__flask = Flask(__name__)
 
-        bottle.get('/')(self.__home_page)
-        bottle.post('/')(self.__home_page)
-
-    def add_home_page(self, name, handle):
-        self.__home_page_available[name] = handle
-
-    def add_template_dir(self, path):
-        bottle.TEMPLATE_PATH[:0] = [path]
+    def add_home_page(self, *args, **kwargs):
+        pass # todo
+#        home.add_home_page(*args, **kwargs)
 
     def load_configuration(self):
         try:
@@ -30,27 +27,13 @@ class Module:
                 'home_page':    '',
             }
 
+    def get_app(self):
+        return self.__flask
+
     def thread_run(self):
-        self.add_template_dir(
-            '%s/views' % os.path.dirname(os.path.abspath(__file__))
+        self.__flask.run(
+            host='0.0.0.0',
+            port=self.__config['port'],
+            debug=Log.get_logger().isEnabledFor(logging.DEBUG),
+            use_reloader=False,
         )
-
-        if Log.get_logger().isEnabledFor(logging.DEBUG):
-            bottle.debug()
-
-        bottle.run(host='0.0.0.0', port=self.__config['port'], quiet=True)
-
-    def __home_page(self):
-
-        if (
-                self.__home_page_available and
-                not self.__config['home_page'] in self.__home_page_available
-            ):
-            self.__config['home_page'] = sorted(
-                self.__home_page_available.keys()
-            )[-1]
-
-        if self.__config['home_page'] in self.__home_page_available:
-            return self.__home_page_available[self.__config['home_page']]()
-
-        return 'MoLA'
