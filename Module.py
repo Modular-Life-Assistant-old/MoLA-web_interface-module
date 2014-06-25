@@ -1,6 +1,6 @@
 from core import Log
 
-#from modules.web_interface.pages import home
+from modules.web_interface.pages import home
 
 from flask import Flask
 import logging
@@ -11,8 +11,7 @@ class Module:
         self.__flask = Flask(__name__)
 
     def add_home_page(self, *args, **kwargs):
-        pass # todo
-#        home.add_home_page(*args, **kwargs)
+        home.add_home_page(*args, **kwargs)
 
     def load_configuration(self):
         try:
@@ -31,6 +30,9 @@ class Module:
         return self.__flask
 
     def thread_run(self):
+
+        self.__flask.register_blueprint(home.app)
+
         self.__flask.run(
             host='0.0.0.0',
             port=self.__config['port'],
