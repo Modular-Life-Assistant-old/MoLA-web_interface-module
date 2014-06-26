@@ -1,6 +1,6 @@
 from core import ModuleManager
 
-from flask import Blueprint, redirect
+from flask import Blueprint, redirect, url_for, render_template
 
 app = Blueprint('home', __name__)
 
@@ -26,4 +26,7 @@ def home_page():
 
 @app.route('/menu')
 def home_list():
-    return str(__home_page_available)
+    return render_template(
+        'list.html',
+        list=__home_page_available
+    )
