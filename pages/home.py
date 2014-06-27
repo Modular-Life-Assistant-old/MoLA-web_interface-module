@@ -27,6 +27,6 @@ def home_page():
 @app.route('/menu')
 def home_list():
     return render_template(
-        'list.html',
+        'grid.html',
         list=__home_page_available
     )
