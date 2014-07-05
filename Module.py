@@ -29,9 +29,11 @@ class Module:
     def get_app(self):
         return self.__flask
 
-    def thread_run(self):
+    def register_blueprint(self, app):
+        self.__flask.register_blueprint(app)
 
-        self.__flask.register_blueprint(home.app)
+    def thread_run(self):
+        self.register_blueprint(home.app)
 
         self.__flask.run(
             host='0.0.0.0',
