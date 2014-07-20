@@ -3,6 +3,7 @@ from core import Log
 from modules.web_interface.pages import home
 
 from flask import Flask
+import json
 import logging
 import os
 
@@ -14,17 +15,16 @@ class Module:
         home.add_home_page(*args, **kwargs)
 
     def load_configuration(self):
-        try:
-            module_path = os.path.dirname(os.path.abspath(__file__))
-            with open('%slog.conf' % module_path) as config_file:
-                self.__config = json.load(config_file)
+        config = {}
+        config_path = '%s/configs/web.json' % (
+            os.path.dirname(os.path.abspath(__file__))
+        )
 
-        except EnvironmentError:
-            # default config
-            self.__config = {
-                'port':         14212,
-                'home_page':    '',
-            }
+        if os.path.isfile(config_path):
+            with open(config_path) as config_file:
+                config = json.load(config_file)
+
+        self.__port = config['port'] if 'port' in config else 14212
 
     def get_app(self):
         return self.__flask
@@ -37,7 +37,7 @@ class Module:
 
         self.__flask.run(
             host='0.0.0.0',
-            port=self.__config['port'],
+            port=self.__port,
             debug=Log.get_logger().isEnabledFor(logging.DEBUG),
             use_reloader=False,
         )
